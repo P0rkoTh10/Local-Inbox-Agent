@@ -22,32 +22,14 @@ Unlike traditional assistant agents that upload your inbox to a cloud LLM (OpenA
 - **Data Ownership:** Your emails and credentials (`token_gmail.json`, etc.) remain on your disk, not on a third-party server.
 - **Minimal Surface:** The only network activity is with the Google APIs you explicitly authorize. There is no third-party AI provider in the loop.
 
+## Features
 
-## Pipeline
-
-```mermaid
-flowchart TD
-    A["Start watcher<br/>(start_watcher.bat)"] --> B["poll_gmail.py<br/>loop every 60s on INBOX (max 20)"]
-    B --> C{"New email?<br/>(id not seen in state.json)"}
-    C -- "no" --> B
-    C -- "yes" --> D["Gmail messages.get(full)<br/>HTML → text + attachments"]
-    D --> E["Save to Inbox/to_sort/&lt;ts&gt;_&lt;id&gt;_&lt;subj&gt;/mail.json"]
-    E --> F["Ollama gemma3:4b<br/>categorize the email (14 categories, temp 0.1)"]
-    F --> G["Move to Inbox/sorted/&lt;category&gt;/<br/>+ apply Gmail label"]
-    G --> H{"Excluded category?<br/>spam / social / other / housing"}
-    H -- "yes → no appointments" --> B
-    H -- "no" --> I["Ollama gemma3:4b<br/>extract appointment JSON<br/>date, title, location, description, todo, link"]
-    I --> J{"Valid date/time?"}
-    J -- "no" --> B
-    J -- "yes" --> K["Append to Inbox/schedule.txt<br/>(dedup by email id)"]
-    K --> L{"Physical or online appointment?"}
-    L -- "online (Zoom/Meet/Teams)" --> M["Calendar event<br/>location = Online + call link in description"]
-    M --> B
-    L -- "physical" --> N["Google Routes API<br/>driving time from home (maps_config.json)"]
-    N --> O["TRAVEL event<br/>ends 15 min early · location = destination"]
-    O --> P["APPOINTMENT event<br/>exact time · direct Gmail mail link in description"]
-    P --> B
-```
+- **Continuous Inbox Polling** — checks your INBOX every 60 seconds and picks up the 20 most recent messages, so nothing is missed even after standby.
+- **Local LLM Categorization** — every email is sorted into one of 14 categories by a local Gemma model: spam, social, bills, official communications, purchases, subscriptions, payments, friends & family, work, job offers, events/appointments, housing, important, other.
+- **Gmail Labeling** — each categorized email gets the matching Gmail label automatically.
+- **Automatic Appointment Detection** — for non-excluded categories, the agent asks Gemma to extract a structured appointment (date, title, location, description, TODO, link).
+- **Google Calendar Scheduling** — detected appointments are created as Calendar events with location, description, the TODO note and a direct link back to the original email.
+- **Smart Travel Estimation** — for physical appointments, Google Routes estimates driving time from home and creates a separate "Travel to..." event that ends 15 minutes before you need to be there.
 
 ## File tree
 
@@ -91,6 +73,32 @@ Local-Inbox-Agent/
 **Python (pip):** `google-api-python-client`, `google-auth`, `google-auth-oauthlib`, `requests`, `psutil` (see `requirements.txt`).
 
 **Node (npm) in `gcal/scripts`:** `googleapis`.
+
+## Pipeline
+
+```mermaid
+flowchart TD
+    A["Start watcher<br/>(start_watcher.bat)"] --> B["poll_gmail.py<br/>loop every 60s on INBOX (max 20)"]
+    B --> C{"New email?<br/>(id not seen in state.json)"}
+    C -- "no" --> B
+    C -- "yes" --> D["Gmail messages.get(full)<br/>HTML → text + attachments"]
+    D --> E["Save to Inbox/to_sort/&lt;ts&gt;_&lt;id&gt;_&lt;subj&gt;/mail.json"]
+    E --> F["Ollama gemma3:4b<br/>categorize the email (14 categories, temp 0.1)"]
+    F --> G["Move to Inbox/sorted/&lt;category&gt;/<br/>+ apply Gmail label"]
+    G --> H{"Excluded category?<br/>spam / social / other / housing"}
+    H -- "yes → no appointments" --> B
+    H -- "no" --> I["Ollama gemma3:4b<br/>extract appointment JSON<br/>date, title, location, description, todo, link"]
+    I --> J{"Valid date/time?"}
+    J -- "no" --> B
+    J -- "yes" --> K["Append to Inbox/schedule.txt<br/>(dedup by email id)"]
+    K --> L{"Physical or online appointment?"}
+    L -- "online (Zoom/Meet/Teams)" --> M["Calendar event<br/>location = Online + call link in description"]
+    M --> B
+    L -- "physical" --> N["Google Routes API<br/>driving time from home (maps_config.json)"]
+    N --> O["TRAVEL event<br/>ends 15 min early · location = destination"]
+    O --> P["APPOINTMENT event<br/>exact time · direct Gmail mail link in description"]
+    P --> B
+```
 
 ## Rules
 
