@@ -1,0 +1,16 @@
+{
+  "id": "FAKEMAIL001",
+  "threadId": "FAKETHREAD001",
+  "headers": {
+    "From": "Jane Doe <jane.doe@examplecorp.com>",
+    "To": "you@example.com",
+    "Cc": "",
+    "Subject": "Welcome to ExampleCorp - your first day",
+    "Date": "Mon, 31 Aug 2026 14:30:00 +0200"
+  },
+  "body_text": "Dear new colleague,\n\nWe are delighted to welcome you to ExampleCorp. Your first day will be on 1 September 2026 at 09:00 at 230 Example Street, Sample City.\n\nPlease bring your ID and two passport-size photos for your badge.\n\nBest regards,\nHR Team",
+  "attachments": [],
+  "labels": ["INBOX"],
+  "internalDate": "1785665400000",
+  "snippet": "We are delighted to welcome you to ExampleCorp. Your first day will be..."
+}

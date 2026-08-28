@@ -1,0 +1,2 @@
+2026-09-01 09:00 | Onboarding ExampleCorp - first day | 230 Example Street, Sample City | First day at ExampleCorp | TODO: bring ID and photos | id:FAKEMAIL001
+2026-09-03 14:00 | Technical interview | Online | Technical interview team | TODO: connect 5 minutes early | id:FAKEMAIL002

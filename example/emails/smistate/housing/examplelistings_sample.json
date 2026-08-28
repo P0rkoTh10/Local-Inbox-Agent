@@ -1,0 +1,17 @@
+{
+  "id": "FAKEMAIL004",
+  "threadId": "FAKETHREAD004",
+  "headers": {
+    "From": "marketplace@examplelistings.com",
+    "To": "you@example.com",
+    "Cc": "",
+    "Subject": "New apartment in Sample City - 2 bedrooms",
+    "Date": "Thu, 3 Sep 2026 09:20:00 +0200"
+  },
+  "body_text": "Check out this new listing: 2-bedroom apartment, 75 sqm, 800 EUR/month, at 12 Main Street, Sample City.\n\nSee photos and schedule a visit.",
+  "attachments": [],
+  "labels": ["INBOX"],
+  "internalDate": "1785835200000",
+  "snippet": "Check out this new listing: 2-bedroom apartment, 75 sqm, 800 EUR/month.",
+  "categoria": "housing"
+}

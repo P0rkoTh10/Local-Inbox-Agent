@@ -1,0 +1,16 @@
+# Personal data & secrets — never commit
+inbox/da_smistare/
+inbox/smistate/
+inbox/schedule.txt
+logs/
+*.log
+token_gmail.json
+client_secret.json
+state.json
+check.log
+maps_config.json
+# OS
+Thumbs.db
+Desktop.ini
+__pycache__/
+*.pyc

@@ -1,0 +1,17 @@
+{
+  "id": "FAKEMAIL003",
+  "threadId": "FAKETHREAD003",
+  "headers": {
+    "From": "noreply@examplejobs.com",
+    "To": "you@example.com",
+    "Cc": "",
+    "Subject": "New job recommendation: Senior Engineer at ExampleCo",
+    "Date": "Wed, 2 Sep 2026 08:00:00 +0200"
+  },
+  "body_text": "We found a role that might interest you: Senior Software Engineer at ExampleCo.\n\nSalary: competitive. Location: Remote.\n\nView and apply on our platform.",
+  "attachments": [],
+  "labels": ["INBOX"],
+  "internalDate": "1785744000000",
+  "snippet": "We found a role that might interest you: Senior Software Engineer at ExampleCo.",
+  "categoria": "spam"
+}

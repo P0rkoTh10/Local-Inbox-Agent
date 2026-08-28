@@ -1,0 +1,16 @@
+{
+  "id": "FAKEMAIL002",
+  "threadId": "FAKETHREAD002",
+  "headers": {
+    "From": "meet.events@example.com",
+    "To": "you@example.com",
+    "Cc": "",
+    "Subject": "Interview invitation - 3 September 2026",
+    "Date": "Tue, 1 Sep 2026 10:15:00 +0200"
+  },
+  "body_text": "Hi,\n\nWe would like to invite you to a technical interview on 3 September 2026 at 14:00 (online).\n\nJoin link: https://meet.google.com/abc-defg-hij\n\nPlease connect 5 minutes early.\n\nBest regards",
+  "attachments": [],
+  "labels": ["INBOX"],
+  "internalDate": "1785669000000",
+  "snippet": "We would like to invite you to a technical interview on 3 September 2026..."
+}
