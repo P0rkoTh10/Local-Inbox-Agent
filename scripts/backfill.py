@@ -1,5 +1,5 @@
 """
-Backfills the last N emails into inbox/da_smistare/
+Backfills the last N emails into Inbox/to_sort/
 Does NOT modify poll_gmail.py - replicates the save logic.
 """
 import os, json, base64, re
@@ -8,9 +8,9 @@ from datetime import datetime
 # Adjust these paths to your environment.
 CLIENT_SECRET = r"C:\path\to\gcal\scripts\client_secret.json"
 TOKEN_PATH = r"C:\path\to\watcher\token_gmail.json"
-INBOX_BASE = r"C:\path\to\watcher\inbox"
-DA_SMISTARE = os.path.join(INBOX_BASE, "da_smistare")
-SMISTATE = os.path.join(INBOX_BASE, "smistate")
+INBOX_BASE = r"C:\path\to\watcher\Inbox"
+TO_SORT = os.path.join(INBOX_BASE, "to_sort")
+SORTED = os.path.join(INBOX_BASE, "sorted")
 
 SCOPES = [
     "https://www.googleapis.com/auth/gmail.readonly",
@@ -105,7 +105,7 @@ def save_mail(service, nid):
     except:
         date_str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     safe_subj = re.sub(r'[\\/:*?"<>|]', "_", hdrs.get("Subject","no_subject"))[:40].strip() or "no_subject"
-    mail_dir = os.path.join(DA_SMISTARE, f"{date_str}_{nid}_{safe_subj}")
+    mail_dir = os.path.join(TO_SORT, f"{date_str}_{nid}_{safe_subj}")
     if os.path.exists(mail_dir):
         print(f"  Skip {nid} already present")
         return mail_dir
@@ -152,16 +152,16 @@ def save_mail(service, nid):
 if __name__ == "__main__":
     import sys
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    os.makedirs(DA_SMISTARE, exist_ok=True)
-    os.makedirs(SMISTATE, exist_ok=True)
+    os.makedirs(TO_SORT, exist_ok=True)
+    os.makedirs(SORTED, exist_ok=True)
     service = get_service()
     N = int(sys.argv[1]) if len(sys.argv) > 1 else 40
     print(f"Backfilling the last {N} emails...")
     res = service.users().messages().list(userId="me", maxResults=N, q="").execute()
     msgs = res.get("messages", [])
-    print(f"Found {len(msgs)} emails, saving to {DA_SMISTARE}")
+    print(f"Found {len(msgs)} emails, saving to {TO_SORT}")
     for m in msgs:
         save_mail(service, m["id"])
     print("Backfill complete.")
-    count = len([d for d in os.listdir(DA_SMISTARE) if os.path.isdir(os.path.join(DA_SMISTARE, d))])
-    print(f"Total folders in da_smistare: {count}")
+    count = len([d for d in os.listdir(TO_SORT) if os.path.isdir(os.path.join(TO_SORT, d))])
+    print(f"Total folders in to_sort: {count}")

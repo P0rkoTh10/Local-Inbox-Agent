@@ -10,7 +10,7 @@ Traditional "assistant" agents that manage your email typically send your inbox 
 
 - **No cloud LLM** — categorization and appointment extraction are done by a local model ([Gemma](https://ollama.com) via Ollama) at `http://localhost:11434`. Your email text never leaves your computer.
 - **Minimal network surface** — the only internet calls are to Google APIs you explicitly authorize (Gmail read/modify/labels, Google Calendar, and optionally Google Routes for travel-time). There is no third-party AI provider in the loop.
-- **Everything stays on disk** — emails are stored locally in `inbox/`, and your credentials/tokens (`token_gmail.json`, `maps_config.json`, `state.json`) are gitignored and never shared.
+- **Everything stays on disk** — emails are stored locally in `Inbox/` (`to_sort/` and `sorted/`), and your credentials/tokens (`token_gmail.json`, `maps_config.json`, `state.json`) are gitignored and never shared.
 - **It never sends email** — the agent only reads, labels, and sorts. No outbound mail logic exists.
 
 In short: you get the convenience of an automated inbox assistant with the **privacy of a fully offline tool** — your data belongs to you, not to an AI company's training set.
@@ -35,15 +35,15 @@ flowchart TD
     B --> C{"New email?<br/>(id not seen in state.json)"}
     C -- "no" --> B
     C -- "yes" --> D["Gmail messages.get(full)<br/>HTML → text + attachments"]
-    D --> E["Save to inbox/da_smistare/&lt;ts&gt;_&lt;id&gt;_&lt;subj&gt;/mail.json"]
+    D --> E["Save to Inbox/to_sort/&lt;ts&gt;_&lt;id&gt;_&lt;subj&gt;/mail.json"]
     E --> F["Ollama gemma3:4b<br/>categorize the email (14 categories, temp 0.1)"]
-    F --> G["Move to inbox/smistate/&lt;category&gt;/<br/>+ apply Gmail label"]
+    F --> G["Move to Inbox/sorted/&lt;category&gt;/<br/>+ apply Gmail label"]
     G --> H{"Excluded category?<br/>spam / social / other / housing"}
     H -- "yes → no appointments" --> B
     H -- "no" --> I["Ollama gemma3:4b<br/>extract appointment JSON<br/>date, title, location, description, todo, link"]
     I --> J{"Valid date/time?"}
     J -- "no" --> B
-    J -- "yes" --> K["Append to inbox/schedule.txt<br/>(dedup by email id)"]
+    J -- "yes" --> K["Append to Inbox/schedule.txt<br/>(dedup by email id)"]
     K --> L{"Physical or online appointment?"}
     L -- "online (Zoom/Meet/Teams)" --> M["Calendar event<br/>location = Online + call link in description"]
     M --> B
@@ -57,11 +57,11 @@ flowchart TD
 
 ```
 Local-Inbox-Agent/
-├── poll_gmail.py              # main poller: inbox (20) → Gemma 4b → Gmail labels + schedule.txt + Calendar
-├── inbox/                       # created at runtime (gitignored)
+├── poll_gmail.py              # main poller: INBOX (20) → Gemma 4b → Gmail labels + schedule.txt + Calendar
+├── Inbox/                       # created at runtime (gitignored)
 │   ├── schedule.txt             # gitignored — extracted appointments (YYYY-MM-DD HH:MM | title | description | TODO)
-│   ├── da_smistare/             # gitignored — new emails waiting
-│   └── smistate/<category>/     # gitignored — sorted emails
+│   ├── to_sort/                 # gitignored — new emails waiting to be sorted
+│   └── sorted/<category>/       # gitignored — sorted emails
 ├── logs/                        # gitignored — poll.log, apply.log, etc.
 ├── scripts/
 │   ├── backfill.py              # backfill the last N emails
@@ -69,7 +69,7 @@ Local-Inbox-Agent/
 │   ├── apply_labels.py
 │   ├── create_labels.py
 │   └── kill_poll.py
-├── example/                     # sample configs and fake/placeholder emails
+├── example/                     # fictitious sample configs and placeholder emails (incl. to_sort + sorted)
 ├── start_watcher.bat            # start poll_gmail.py (60s poll + Gemma)
 ├── stop_watcher.bat             # stop the poll
 ├── run_poll.bat                 # wrapper with logging
@@ -101,7 +101,7 @@ Local-Inbox-Agent/
 - **Never sends email** — only `gmail.readonly` / `modify` / `labels`.
 - Only `in:inbox` (20-mail buffer). Categories: spam, social, bills, official communications, purchases (real ones only), subscriptions, payments, friends & family, work, job offers (personal only), events/appointments, housing, important, other.
 - Job-board emails (Indeed, LinkedIn, Glassdoor) are never classified as "work" — handled deterministically before the LLM.
-- Security: all credentials, state, inbox data and logs are gitignored. The `example/` folder contains only fictitious placeholder content.
+- Security: all credentials, state, inbox data and logs are gitignored. The `example/` folder contains only fictitious placeholder content, including sample emails waiting to be sorted under `example/emails/to_sort/` and already-sorted ones under `example/emails/sorted/`.
 
 ## How to adapt
 

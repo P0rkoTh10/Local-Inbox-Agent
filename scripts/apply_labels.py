@@ -9,9 +9,9 @@ try: sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 except: pass
 
 # Adjust these paths to your environment.
-INBOX_BASE = r"C:\path\to\watcher\inbox"
-SMISTATE = os.path.join(INBOX_BASE, "smistate")
-DA_SMISTARE = os.path.join(INBOX_BASE, "da_smistare")
+INBOX_BASE = r"C:\path\to\watcher\Inbox"
+SORTED = os.path.join(INBOX_BASE, "sorted")
+TO_SORT = os.path.join(INBOX_BASE, "to_sort")
 TOKEN = r"C:\path\to\watcher\token_gmail.json"
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly','https://www.googleapis.com/auth/gmail.modify','https://www.googleapis.com/auth/gmail.labels','https://www.googleapis.com/auth/calendar']
 
@@ -56,7 +56,7 @@ def build_label_map(svc):
 
 def collect_mails():
     roots = []
-    for base in [SMISTATE, DA_SMISTARE]:
+    for base in [SORTED, TO_SORT]:
         if not os.path.exists(base):
             continue
         for root, dirs, files in os.walk(base):

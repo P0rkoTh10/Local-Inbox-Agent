@@ -1,6 +1,6 @@
 """
-Categorizes emails in inbox/da_smistare/ by calling gemma3:4b via Ollama.
-Moves them to inbox/smistate/<category>/
+Categorizes emails in Inbox/to_sort/ by calling gemma3:4b via Ollama.
+Moves them to Inbox/sorted/<category>/
 """
 import os, json, re, shutil, pathlib, requests, time, sys
 try: sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -9,9 +9,9 @@ try: sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 except: pass
 
 # Adjust these paths to your environment.
-INBOX_BASE = r"C:\path\to\watcher\inbox"
-DA_SMISTARE = os.path.join(INBOX_BASE, "da_smistare")
-SMISTATE = os.path.join(INBOX_BASE, "smistate")
+INBOX_BASE = r"C:\path\to\watcher\Inbox"
+TO_SORT = os.path.join(INBOX_BASE, "to_sort")
+SORTED = os.path.join(INBOX_BASE, "sorted")
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
 MODEL = "gemma3:4b"
@@ -103,22 +103,22 @@ def process_one(mail_dir):
     return cat, False
 
 if __name__ == "__main__":
-    os.makedirs(SMISTATE, exist_ok=True)
-    if not os.path.exists(DA_SMISTARE):
-        print(f"Missing {DA_SMISTARE}")
+    os.makedirs(SORTED, exist_ok=True)
+    if not os.path.exists(TO_SORT):
+        print(f"Missing {TO_SORT}")
         exit(1)
-    dirs = [d for d in os.listdir(DA_SMISTARE) if os.path.isdir(os.path.join(DA_SMISTARE, d))]
+    dirs = [d for d in os.listdir(TO_SORT) if os.path.isdir(os.path.join(TO_SORT, d))]
     dirs.sort()
-    print(f"Found {len(dirs)} emails in da_smistare - model {MODEL}")
+    print(f"Found {len(dirs)} emails in to_sort - model {MODEL}")
     for d in dirs:
-        src = os.path.join(DA_SMISTARE, d)
+        src = os.path.join(TO_SORT, d)
         try:
             cat, already = process_one(src)
-            dest_root = os.path.join(SMISTATE, cat)
+            dest_root = os.path.join(SORTED, cat)
             os.makedirs(dest_root, exist_ok=True)
             dest = os.path.join(dest_root, d)
             if os.path.exists(dest):
-                print(f"  [skip] {d} -> {cat} (already in smistate)")
+                print(f"  [skip] {d} -> {cat} (already in sorted)")
                 if os.path.exists(src) and src != dest:
                     try: shutil.rmtree(src)
                     except: pass
@@ -133,6 +133,6 @@ if __name__ == "__main__":
             print(f"  ERROR {d}: {e}")
     print("Done.")
     for cat in CATEGORIES:
-        p = os.path.join(SMISTATE, cat)
+        p = os.path.join(SORTED, cat)
         n = len(os.listdir(p)) if os.path.exists(p) else 0
         if n: print(f"  {cat}: {n}")

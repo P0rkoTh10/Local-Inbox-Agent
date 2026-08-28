@@ -1,7 +1,7 @@
 # Personal data & secrets — never commit
-inbox/da_smistare/
-inbox/smistate/
-inbox/schedule.txt
+# Runtime inbox created by the agent (real emails, credentials, state)
+Inbox/
+inbox/
 logs/
 *.log
 token_gmail.json

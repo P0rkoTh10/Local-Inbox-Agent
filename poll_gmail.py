@@ -91,9 +91,9 @@ GCAL_JS = r"C:\path\to\gcal\scripts\gcal.js"
 CLIENT_SECRET = r"C:\path\to\gcal\scripts\client_secret.json"
 TOKEN_PATH = r"C:\path\to\watcher\token_gmail.json"
 STATE_PATH = r"C:\path\to\watcher\state.json"
-INBOX_DIR = r"C:\path\to\watcher\inbox"
-DA_SMISTARE = os.path.join(INBOX_DIR, "da_smistare")
-SMISTATE = os.path.join(INBOX_DIR, "smistate")
+INBOX_DIR = r"C:\path\to\watcher\Inbox"
+TO_SORT = os.path.join(INBOX_DIR, "to_sort")
+SORTED = os.path.join(INBOX_DIR, "sorted")
 SCHEDULE_PATH = os.path.join(INBOX_DIR, "schedule.txt")
 
 # --- Maps / travel (Routes API) ---
@@ -288,7 +288,7 @@ def extract_appointment_and_update_schedule(mail_data):
         return None
 
 def categorize_and_move(service, mail_dir, mail_data):
-    """Calls Gemma, saves the category, moves to smistate/<cat>, applies the Gmail label and updates schedule.txt."""
+    """Calls Gemma, saves the category, moves to sorted/<cat>, applies the Gmail label and updates schedule.txt."""
     if mail_data.get("categoria"):
         try:
             if os.path.exists(SCHEDULE_PATH):
@@ -310,7 +310,7 @@ def categorize_and_move(service, mail_dir, mail_data):
             with open(os.path.join(mail_dir, "categoria.txt"), "w", encoding="utf-8") as f: f.write(cat)
         except Exception as e:
             print(f"  Error saving category: {e}")
-        dest_root = os.path.join(SMISTATE, cat)
+        dest_root = os.path.join(SORTED, cat)
         os.makedirs(dest_root, exist_ok=True)
         dest = os.path.join(dest_root, os.path.basename(mail_dir))
         moved_dir = mail_dir
@@ -323,7 +323,7 @@ def categorize_and_move(service, mail_dir, mail_data):
                 except Exception as e:
                     print(f"  Move error: {e}")
             else:
-                print(f"  Already in smistate/{cat}")
+                print(f"  Already in sorted/{cat}")
                 moved_dir = dest
         try:
             apply_gmail_label(service, mail_data.get("id"), cat)
@@ -365,7 +365,7 @@ def categorize_and_move(service, mail_dir, mail_data):
         with open(os.path.join(mail_dir,"categoria.txt"),"w",encoding="utf-8") as f: f.write(cat)
     except Exception as e:
         print(f"  Error saving category: {e}")
-    dest_root=os.path.join(SMISTATE, cat)
+    dest_root=os.path.join(SORTED, cat)
     os.makedirs(dest_root, exist_ok=True)
     dest=os.path.join(dest_root, os.path.basename(mail_dir))
     moved_dir=mail_dir
@@ -378,7 +378,7 @@ def categorize_and_move(service, mail_dir, mail_data):
             except Exception as e:
                 print(f"  Move error: {e}")
         else:
-            print(f"  Already in smistate/{cat}")
+            print(f"  Already in sorted/{cat}")
             moved_dir=dest
     try:
         apply_gmail_label(service, mail_data.get("id"), cat)
@@ -532,7 +532,7 @@ def poll_once(service, state, first_run=False):
         return
 
     existing_ids = set()
-    for base in [DA_SMISTARE, SMISTATE]:
+    for base in [TO_SORT, SORTED]:
         if os.path.exists(base):
             for root, dirs, files in os.walk(base):
                 if "mail.json" in files:
@@ -559,8 +559,8 @@ def poll_once(service, state, first_run=False):
                 safe_subj = tmp.strip().strip("._ ")[:40].strip()
                 if not safe_subj:
                     safe_subj = "no_subject"
-                os.makedirs(DA_SMISTARE, exist_ok=True)
-                mail_dir = os.path.join(DA_SMISTARE, f"{date_str}_{nid}_{safe_subj}")
+                os.makedirs(TO_SORT, exist_ok=True)
+                mail_dir = os.path.join(TO_SORT, f"{date_str}_{nid}_{safe_subj}")
                 os.makedirs(mail_dir, exist_ok=True)
                 attach_dir = os.path.join(mail_dir, "attachments")
                 saved_attachments = []
@@ -621,12 +621,12 @@ def poll_once(service, state, first_run=False):
     else:
         print(f"[{datetime.now().strftime('%H:%M:%S')}] No new emails (checked {len(ids)}).")
 
-def process_pending_da_smistare(service):
-    """Sorts any emails left in da_smistare (backlog)."""
-    if not os.path.exists(DA_SMISTARE):
+def process_pending_to_sort(service):
+    """Sorts any emails left in to_sort (backlog)."""
+    if not os.path.exists(TO_SORT):
         return
-    for d in os.listdir(DA_SMISTARE):
-        dpath = os.path.join(DA_SMISTARE, d)
+    for d in os.listdir(TO_SORT):
+        dpath = os.path.join(TO_SORT, d)
         if not os.path.isdir(dpath):
             continue
         jpath = os.path.join(dpath, "mail.json")
@@ -651,15 +651,15 @@ if __name__ == "__main__":
     print("Gmail Watcher - polling every 60s + autonomous sorting via Gemma (Ctrl+C to stop)")
     print(f"Token: {TOKEN_PATH}")
     print(f"State: {STATE_PATH}")
-    print(f"Inbox: {INBOX_DIR} -> new in {DA_SMISTARE}")
-    os.makedirs(DA_SMISTARE, exist_ok=True)
-    os.makedirs(SMISTATE, exist_ok=True)
+    print(f"Inbox: {INBOX_DIR} -> new in {TO_SORT}")
+    os.makedirs(TO_SORT, exist_ok=True)
+    os.makedirs(SORTED, exist_ok=True)
     service = get_service()
     state = load_state()
     first = len(state.get("seen_ids", [])) == 0
     poll_once(service, state, first_run=first)
     try:
-        process_pending_da_smistare(service)
+        process_pending_to_sort(service)
     except Exception as e:
         print(f"Backlog error: {e}")
     while True:
@@ -667,6 +667,6 @@ if __name__ == "__main__":
         state = load_state()
         poll_once(service, state, first_run=False)
         try:
-            process_pending_da_smistare(service)
+            process_pending_to_sort(service)
         except Exception as e:
             print(f"Pending error: {e}")
