@@ -2,19 +2,6 @@
 
 Local-first Gmail agent — polls your inbox, categorizes emails with a local LLM (Gemma/Ollama), and auto-schedules appointments to Google Calendar. All inference runs offline on your machine.
 
-## Why privacy-first
-
-Traditional "assistant" agents that manage your email typically send your inbox content to a **cloud LLM** (OpenAI, Anthropic, Google, etc.) for categorization and summary. That means every email — including sensitive personal and work messages — leaves your machine and is processed on someone else's server.
-
-**Local-Inbox-Agent is the opposite.** The entire intelligence layer runs **locally on your device**:
-
-- **No cloud LLM** — categorization and appointment extraction are done by a local model ([Gemma](https://ollama.com) via Ollama) at `http://localhost:11434`. Your email text never leaves your computer.
-- **Minimal network surface** — the only internet calls are to Google APIs you explicitly authorize (Gmail read/modify/labels, Google Calendar, and optionally Google Routes for travel-time). There is no third-party AI provider in the loop.
-- **Everything stays on disk** — emails are stored locally in `Inbox/` (`to_sort/` and `sorted/`), and your credentials/tokens (`token_gmail.json`, `maps_config.json`, `state.json`) are gitignored and never shared.
-- **It never sends email** — the agent only reads, labels, and sorts. No outbound mail logic exists.
-
-In short: you get the convenience of an automated inbox assistant with the **privacy of a fully offline tool** — your data belongs to you, not to an AI company's training set.
-
 ## What it does
 
 ```mermaid
@@ -26,6 +13,15 @@ flowchart LR
     D -- "yes" --> F["📅 Schedule on Calendar<br/>with location, description, TODO,<br/>reference to the email"]
     F --> G["➕ Additional task<br/>to reach the location<br/>(travel + 15 min early)"]
 ```
+
+## Why privacy-first
+
+Unlike traditional assistant agents that upload your inbox to a cloud LLM (OpenAI, Anthropic, Google, etc.), this agent works **locally on your device**.
+
+- **100% Offline Processing:** Categorization and appointment extraction are done by a local model ([Gemma](https://ollama.com) via Ollama) at `http://localhost:11434`. Your email text never leaves your computer.
+- **Data Ownership:** Your emails and credentials (`token_gmail.json`, etc.) remain on your disk, not on a third-party server.
+- **Minimal Surface:** The only network activity is with the Google APIs you explicitly authorize. There is no third-party AI provider in the loop.
+
 
 ## Pipeline
 
